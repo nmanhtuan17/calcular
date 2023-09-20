@@ -1,0 +1,51 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background-color: #ccc;
+    width: 40vh;
+    &__logo {
+        display: flex;
+        place-items: center;
+        height: 120px;
+        width: 40%;
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: 'Mochiy Pop P one', sans-serif;
+        justify-content: space-around;
+        margin: 0 auto;
+        
+    }
+
+    &__menu {
+        position: relative;
+
+        &__item {
+            display: flex;
+            align-items: center;
+            place-content: flex-start;
+            padding: 1rem 3rem;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #555555;
+            transition: color 0.3s ease-in-out;
+
+            
+
+            &__icon {
+                margin-right: 1rem;
+
+                i {
+                    font-size: 1.75rem;
+                }
+            }
+            &__text{
+                text-decoration: none;
+            }
+        }
+    }
+}
+.sidebar a.active {
+    color: white;
+}
