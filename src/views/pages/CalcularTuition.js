@@ -1,12 +1,37 @@
-import {  useContext, useEffect } from "react";
+import {  useContext, useEffect, useState } from "react";
 import '../../styles/style.scss'
 import Context from "../../store/Context";
+import axios from "axios";
 const CalcularTuition = () => {
     const [state, dispatch] = useContext(Context)
-    const tuitions = state.tuitions
+    // const tuitions = state.tuitions
+    const [tuitions, setTuitions] = useState([])
+    const yourTuitions = tuitions.filter((item) => item.user == state.userLogin.username)
+    let stt = 1
+    useEffect(() => {
+        axios.get('https://calcular-server.onrender.com/api/semester')
+                .then(res => setTuitions(res.data))
+    }, [])
+
+    useEffect(() => {
+        if (tuitions) {
+            dispatch({
+                type: 'SET_TUITIONS',
+                payload: tuitions
+            })
+        }
+    }, [tuitions])
     let total = 0
-    tuitions.map(item => {
+    let soTin = 0
+    yourTuitions.map(item => {
         return total += item.hocPhi
+    })
+    yourTuitions.map(item => {
+        return soTin += item.soTin
+    })
+    let soMon = 0
+    yourTuitions.map(item => {
+        return soMon += item.soMon
     })
     return (
         <div className="mt-5 me-5">
@@ -19,19 +44,17 @@ const CalcularTuition = () => {
                         <th scope="col">Số môn</th>
                         <th scope="col">Số tín</th>
                         <th scope="col">Số tiền học phí</th>
-                        <th scope="col">Tình trạng</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {tuitions.map((item, index) => {
+                    {yourTuitions.map((item, index) => {
                         return (
                             <tr key={item.id}>
-                                <td>{item.id}</td>
+                                <td>{stt++}</td>
                                 <td>{`Học kỳ ${item.hocKy} nhóm ${item.nhom} năm ${item.nam}`}</td>
                                 <td>{item.soMon}</td>
                                 <td>{item.soTin}</td>
                                 <td>{item.hocPhi}</td>
-                                <td>{item.tinhTrang}</td>
                             </tr>
                         )
                     })}
@@ -39,7 +62,9 @@ const CalcularTuition = () => {
             </table>
             <div className="row mt-3">
                 <div className="col">Tổng học phí: {total}</div>
-                <div className="col">Tổng số tín: 100</div>
+                <div className="col">Tổng số môn: {soMon}</div>
+                <div className="col">Tổng số tín: {soTin}</div>
+                
             </div>
         </div>
     );

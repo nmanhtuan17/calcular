@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Context from '../../store/Context';
+import axios from 'axios';
 const Calcular = () => {
     const [state, dispatch] = useContext(Context)
     const mucPhi = state.mucPhi
@@ -13,21 +14,22 @@ const Calcular = () => {
     const [tinChi, setTinChi] = useState(null)
     const [heSo, setHeSo] = useState(null)
     const [tuition, setTuition] = useState({})
-
-    let stt = 1
-    const total = () => {
-        let sum = 0
-        if (tuition && tuition.monHoc) {
+    const [reCalcular, setreCalcular] = useState(false)
+    let sum = useMemo(() => {
+        let temp = 0
+        if (reCalcular && tuition && tuition.monHoc) {
 
             tuition.monHoc.map((item) => {
-                return sum += (item.tinChi * item.heSo).toFixed(1) * mucPhi
+                return temp += (item.tinChi * item.heSo).toFixed(1) * mucPhi
             })
         }
-        return sum
-    }
+        console.log(temp);
+        return temp
+    }, [reCalcular])
+    let stt = 1
 
 
-    const handleAddTime = ()=>{
+    const handleAddTime = () => {
         setTuition({
             monHoc: [],
             hocKy: hocKy,
@@ -41,7 +43,6 @@ const Calcular = () => {
 
     const handleAddCourse = () => {
         const newCourse = {
-            id: Math.random(),
             maMH: maMH,
             name: nameCourse,
             tinChi: tinChi,
@@ -57,6 +58,32 @@ const Calcular = () => {
         setNameCourse('')
         setTinChi(null)
         setHeSo(null)
+    }
+    const handleCalcular = () => {
+        setreCalcular(true)
+        let total = 0
+        let soTin = 0
+        tuition.monHoc.map((item) => {
+            return total += (item.tinChi * item.heSo).toFixed(1) * mucPhi
+        })
+        tuition.monHoc.map((item) => {
+            return soTin += item.tinChi * 1
+        })
+        const newTuition = {
+            hocKy: tuition.hocKy,
+            nhom: tuition.nhom,
+            nam: tuition.nam,
+            hocPhi: total,
+            soTin: soTin,
+            soMon: tuition.monHoc.length,
+            user: state.userLogin.username
+        }
+        axios.post('https://calcular-server.onrender.com/api/semester/addTuition', newTuition)
+            .then(response => console.log(response))
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+        
     }
     return (
         <div className="mt-5 me-5">
@@ -75,7 +102,7 @@ const Calcular = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            { tuition.monHoc.map((item, index) => {
+                            {tuition.monHoc.map((item, index) => {
                                 return (
                                     <tr key={item.id}>
                                         <td>{stt++}</td>
@@ -88,7 +115,7 @@ const Calcular = () => {
                             })}
                         </tbody>
                     </table>
-                    <div>Tổng học phí: {total()}</div>
+                    <div>Tổng học phí: {sum}</div>
                 </div>}
             <div className='row mt-5'>
                 {(!tuition.hocKy && !tuition.nhom && !tuition.nam) ?
@@ -96,21 +123,21 @@ const Calcular = () => {
                         <div className='mb-3 fs-5 fw-5'>Nhập thông tin kỳ học</div>
                         <div className='col-lg-3'>
                             <label htmlFor='hocky'>Học kỳ</label>
-                            <input value={tuition.hocKy} type="number" id='hocky' className='form-control' onChange={(e) => setHocKy(e.target.value)}/>
+                            <input value={tuition.hocKy} type="number" id='hocky' className='form-control' onChange={(e) => setHocKy(e.target.value)} />
                         </div>
                         <div className='col-lg-3'>
                             <label htmlFor='nhom'>Nhóm</label>
-                            <input value={tuition.nhom} type="number" id='nhom' className='form-control' onChange={(e) => setNhom(e.target.value)}/>
+                            <input value={tuition.nhom} type="number" id='nhom' className='form-control' onChange={(e) => setNhom(e.target.value)} />
                         </div>
                         <div className='col-lg-3'>
                             <label htmlFor='namhoc'>Năm học</label>
-                            <input value={tuition.nam} type="text" id='namhoc' className='form-control' onChange={(e) => setNam(e.target.value)}/>
+                            <input value={tuition.nam} type="text" id='namhoc' className='form-control' onChange={(e) => setNam(e.target.value)} />
                         </div>
                         <div className='col-lg-3'>
                             <label htmlFor='dvt'>Đơn vị tính</label>
                             <input value={mucPhi} type="number" id='dvt' className='form-control' onChange={(e) => dispatch({
                                 type: 'UPDATE_DVT',
-                                payload: {mucPhi: e.target.value}
+                                payload: { mucPhi: e.target.value }
                             })} />
                         </div>
                         <button className='mt-4 btn btn-primary col-lg-1 ms-2' onClick={() => handleAddTime()}>Thêm</button>
@@ -134,10 +161,11 @@ const Calcular = () => {
                             <input value={heSo} type="number" id='heso' className='form-control' onChange={(e) => setHeSo(e.target.value)} />
                         </div>
                         <button className='mt-4 btn btn-primary col-lg-2 ms-2' onClick={() => handleAddCourse()}>Thêm môn học</button>
+                        <button className='mt-4 btn btn-primary col-lg-2 ms-2' onClick={() => handleCalcular()}>Tính tổng học phí</button>
                     </div>
                 }
             </div>
-            
+
         </div>
     );
 }

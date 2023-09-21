@@ -7,32 +7,46 @@ import { toast } from 'react-toastify';
 import Context from '../../store/Context';
 const Home = () => {
     const [state, dispatch] = useContext(Context)
-    const courses = state.courses
-
-
+    const [courses, setCourses] = useState([])
+    const [shouldFetchData, setShouldFetchData] = useState(true);
     const [isAdd, setIsAdd] = useState(false)
     const [maMH, setMaMH] = useState()
     const [nameCourse, setNameCourse] = useState()
     const [heSo, setHeSo] = useState()
     const [tinChi, setTinChi] = useState()
+    useEffect(() => {
+        if (shouldFetchData) {
+            axios.get('https://calcular-server.onrender.com/api/courses')
+                .then(res => setCourses(res.data))
+            setShouldFetchData(false)
+        }
+    }, [shouldFetchData])
 
-
+    useEffect(() => {
+        if (courses) {
+            dispatch({
+                type: 'SET_COURSES',
+                payload: courses
+            })
+        }
+    }, [courses])
     const handleAddCourse = () => {
         let newCourse = {
             maMH: maMH,
-            name: nameCourse,
+            nameCourse: nameCourse,
             tinChi: tinChi,
             heSo: heSo
         }
-        // setCourses([...courses, newCourse])
-        dispatch({
-            type: 'ADD_COURSE',
-            payload: newCourse
-        })
+        axios.post('https://calcular-server.onrender.com/api/courses/addcourse', newCourse)
+            .then(response => console.log(response))
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
         setIsAdd(false)
+        setShouldFetchData(true)
         toast.success('Thêm thành công')
-        console.log(courses);
     }
+    console.log('log from home', state.userLogin);
     return (
         <div className='home'>
             <div className="mb-5 text-center fw-bold fs-3">Danh sách môn học</div>
@@ -46,11 +60,11 @@ const Home = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {courses.map((item, index) => {
+                    {courses && courses.map((item, index) => {
                         return (
-                            <tr key={item.maMH}>
+                            <tr key={item._id}>
                                 <td>{item.maMH}</td>
-                                <td>{item.name}</td>
+                                <td>{item.nameCourse}</td>
                                 <td>{item.tinChi}</td>
                                 <td>{item.heSo}</td>
                             </tr>
