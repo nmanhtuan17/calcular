@@ -37,7 +37,7 @@ const Home = () => {
             tinChi: tinChi,
             heSo: heSo
         }
-        axios.post('https://calcular-server.onrender.com/api/courses/addcourse', newCourse)
+        axios.post('https://calcular-server.onrender.com/api/courses/addCourse', newCourse)
             .then(response => console.log(response))
             .catch(error => {
                 console.error('There was an error!', error);
