@@ -16,11 +16,11 @@ const Home = () => {
     const [tinChi, setTinChi] = useState()
     useEffect(() => {
         if (shouldFetchData) {
-            axios.get('https://calcular-server.onrender.com/api/courses')
-                .then(res => setCourses(res.data))
-            setShouldFetchData(false)
         }
-    }, [shouldFetchData])
+        axios.get('https://calcular-server.onrender.com/api/courses')
+            .then(res => setCourses(res.data))
+        
+    })
 
     useEffect(() => {
         if (courses) {
@@ -38,15 +38,13 @@ const Home = () => {
             heSo: heSo
         }
         axios.post('https://calcular-server.onrender.com/api/courses/addCourse', newCourse)
-            .then(response => console.log(response))
+            .then(response => setShouldFetchData(true))
             .catch(error => {
                 console.error('There was an error!', error);
             });
         setIsAdd(false)
-        setShouldFetchData(true)
         toast.success('Thêm thành công')
     }
-    console.log('log from home', state.userLogin);
     return (
         <div className='home'>
             <div className="mb-5 text-center fw-bold fs-3">Danh sách môn học</div>
